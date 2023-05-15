@@ -1,0 +1,75 @@
+---
+title: "Gun Violence in the USA"
+output: html_document
+date: "2023-05-15"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = '/Users/chanks/workspace/gun-violence/gun_violence_archive/mass_shootings_by_year')
+```
+
+
+Summarizing mass shooting data form the gun violence archive, 2014  - 2022: 
+
+```{r}
+library(tidyverse)
+
+#loading in the data: 
+y2014 = read_csv('gva_2014.csv')
+y2015 = read_csv('gva_2015.csv')
+y2016 = read_csv('gva_2016.csv')
+y2017 = read_csv('gva_2017.csv')
+y2018 = read_csv('gva_2018.csv')
+y2019 = read_csv('gva_2019.csv')
+y2020 = read_csv('gva_2020.csv')
+y2021 = read_csv('gva_2021.csv')
+y2022 = read_csv('gva_2022.csv')
+
+
+#creating list of dataframes and years 2014-2022 to iterate through:
+my_data = list(y2014,y2015,y2016,y2017,y2018,y2019,y2020,y2021,y2022)
+years = seq(2014,2022,1)
+
+for(i in 1:length(my_data)){
+ my_data[[i]] = my_data[[i]] %>% mutate(Year = years[i]) #adding a year column for each dataset 
+ my_data[[i]] = my_data[[i]] %>% select(-Operations) #removing operations column because value is NA 
+}
+
+ms = do.call(bind_rows, my_data) #combining all datasets together
+```
+
+Getting summary statistics of mass shootings between 2014 and 2022
+```{r}
+#number of mass shootings by state 
+ms %>% group_by(State) %>% count() %>% arrange(desc(n)) #Illinois is top likely due to gun related violence in Chicaogo. 
+
+ms %>% group_by(Year) %>% count() %>% 
+    ggplot(aes(x = Year, y = n)) + 
+    geom_point() + geom_line() + 
+    labs(title = "The Number of Mass Shootings in the United States has Doubled in 8 Years", 
+         subtitle = "An incident is considered a mass shooting if 4 or more people are shot, exluding the shooter",
+         x = "Year", 
+         y = " # of Mass Shootings", 
+         caption = "Source: Gun Violence Archive") + 
+    theme_bw()
+
+#is the pandemic to blame for this increase in mass shootings ?
+```
+Top 10 states with the most mass shootings in the past 8 years
+```{r}
+ms = ms %>% mutate(State = factor(State)) #chaning State to factor to use fct_reorder() 
+
+ms %>% group_by(State) %>% 
+  count() %>%
+    arrange (desc(n)) %>%
+      head(n = 10) %>%
+        ggplot(aes(x = fct_reorder(State, n), y = n)) + geom_col() + 
+  theme_bw() + 
+  labs(title = "Top 10 States with Most Mass Shootings, 2014 - 2018", 
+       y = "# of Mass Shootings", 
+       x = "State")
+
+#it makes sense that most populous states have most mass shootings. Need to calulate per-capita
+```
+
