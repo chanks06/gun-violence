@@ -71,5 +71,35 @@ ms %>% group_by(State) %>%
        x = "State")
 
 #it makes sense that most populous states have most mass shootings. Need to calulate per-capita
+#this means I need the state population per year 
+
 ```
 
+Calculating mass shootings per capita with 2022 state population data
+```{r}
+library(readxl)
+ms_2022 = ms %>% filter(Year == 2022) 
+
+#pulling state population data: 
+state_pop = read_excel('state_populations_2022_statista.xlsx', sheet = 2)
+
+state_pop = state_pop[3:53,] #removing header rows
+
+state_pop = state_pop %>% rename(State = `Population in the states of the U.S. 2022`, Population = `...2`) 
+
+state_pop = state_pop %>% mutate(Population = Population*1000000)
+
+ms_2022_by_state = ms_2022 %>% group_by(State) %>% count() %>% rename(num_ms = n)
+
+ms_2022_by_state = ms_20222_by_state %>% left_join(state_pop, by = "State") 
+
+ms_per_cap = ms_2022_by_state %>% select(-Population.y) %>% rename(Population = Population.x) %>% mutate(ms_per_cap = num_ms / Population) %>% arrange(desc(ms_per_cap))
+
+```
+Top 10 state of mass shootings per capita: 
+
+```{r}
+ms_per_cap %>% head(n = 10)
+```
+
+Next, we can look at the gun laws in these countries to see if there is a correlation between the high ms states and their lack of gun control. 
