@@ -120,15 +120,18 @@ gun_laws %>% select(STATE, LAWTOTAL) %>% ggplot(aes(x = fct_reorder(STATE, LAWTO
 Joining mass shooting data with gun law data to determine if correlation exists in 2019 : 
 
 ```{r}
-gun_laws = gun_laws %>% rename(State = STATE)
+gun_laws = gun_laws %>% rename(State = STATE) #changing col name so that both datasets have a "
 
 gun_laws_2019 = gun_laws %>% filter(YEAR == 2019) %>% group_by(YEAR, State) %>% select(State, LAWTOTAL) 
 
 ms_per_cap = ms_per_cap %>% mutate(State = factor(State))
   
-ms_per_cap %>% left_join(gun_laws_2019 %>% select(State, LAWTOTAL, YEAR), by = "State")
+ms_per_cap$State = str_trim(ms_per_cap$State) #first attempt of joining datasets was unsuccesful on "State" key, removing any whitespace that may be preventing it. 
+gun_laws_2019$State = str_trim(gun_laws_2019$State)
 
-ms_per_cap %>% arrange(State)
-gun_laws_2019
+ms_per_cap %>% left_join(gun_laws_2019 %>% select(State, LAWTOTAL, YEAR), by = "State") #census data does not consider "District of Columbia" a state. 
+
+
+
 ```
 
