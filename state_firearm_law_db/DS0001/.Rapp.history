@@ -1,1 +1,2 @@
 load("/Users/chanks/workspace/gun-violence/ICPSR_37363/DS0001/37363-0001-Data.rda")
+load("/Users/chanks/workspace/gun-violence/state_firearm_law_db/DS0001/37363-0001-Data.rda")
